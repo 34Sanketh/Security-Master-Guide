@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Security Master Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C0F14;
+    --surface: #141820;
+    --surface2: #1C2230;
+    --border: #252D3D;
+    --accent: #00E5A0;
+    --accent2: #3B82F6;
+    --warn: #F59E0B;
+    --danger: #EF4444;
+    --text: #E2E8F0;
+    --muted: #64748B;
+    --serif: 'DM Serif Display', serif;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .hero {
+    background: linear-gradient(135deg, #0C0F14 0%, #0d1a2e 50%, #0C0F14 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 64px 32px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(0,229,160,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,229,160,0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero p {
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 32px;
+    font-weight: 300;
+    font-size: 16px;
+  }
+
+  /* TRANSFORMATION BLOCK */
+  .transform-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .transform-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .transform-pill.after { border-color: rgba(0,229,160,0.4); color: var(--accent); }
+  .arrow-icon { color: var(--accent); font-size: 20px; }
+
+  /* LAYOUT */
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* OVERVIEW GRID */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 48px 0 32px;
+  }
+  .overview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .overview-card:hover { border-color: var(--accent2); }
+  .overview-card .icon { font-size: 24px; margin-bottom: 8px; }
+  .overview-card .label { font-size: 12px; font-weight: 600; color: var(--text); }
+  .overview-card .sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* SECTION */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 56px;
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* STEP CARD */
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: #2d3748; }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .step-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .step-tag {
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .tag-required { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
+  .tag-optional { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+  .tag-security { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+  .chevron { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .step.open .chevron { transform: rotate(180deg); }
+
+  .step-body {
+    display: none;
+    padding: 0 24px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .step.open .step-body { display: block; }
+
+  /* INSTRUCTIONS */
+  .instructions { margin-top: 16px; }
+  .instruction {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .inst-num {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    background: var(--surface2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .inst-text { color: #CBD5E1; font-size: 14px; flex: 1; }
+  .inst-text strong { color: var(--text); font-weight: 600; }
+  .inst-text code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: #93C5FD;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #0a0d12;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+  .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: color 0.2s;
+  }
+  .copy-btn:hover { color: var(--accent); }
+  .code-block pre {
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    color: #CBD5E1;
+  }
+  .code-block pre .kw { color: #C084FC; }
+  .code-block pre .str { color: #86EFAC; }
+  .code-block pre .cm { color: #4B5563; font-style: italic; }
+  .code-block pre .fn { color: #93C5FD; }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    font-size: 13.5px;
+  }
+  .callout-icon { flex-shrink: 0; font-size: 16px; }
+  .callout.note { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); }
+  .callout.note .callout-icon { color: var(--accent2); }
+  .callout.warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+  .callout.warn .callout-icon { color: var(--warn); }
+  .callout.success { background: rgba(0,229,160,0.07); border: 1px solid rgba(0,229,160,0.2); }
+  .callout.success .callout-icon { color: var(--accent); }
+
+  /* REPEAT NOTE */
+  .repeat-note {
+    background: var(--surface2);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+  }
+  .repeat-note strong { color: var(--text); }
+
+  /* SETTINGS TABLE */
+  .settings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: 13px;
+  }
+  .settings-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .settings-table td {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    color: #CBD5E1;
+  }
+  .settings-table td code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: #93C5FD;
+  }
+  .on { color: var(--accent); font-weight: 600; }
+  .off { color: var(--muted); }
+
+  /* FINAL RESULT */
+  .result-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .result-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .result-check { color: var(--accent); font-size: 16px; flex-shrink: 0; }
+  .result-label { color: var(--text); font-weight: 500; }
+  .result-desc { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+  /* IMPORTANT REMINDERS */
+  .reminders {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 20px;
+  }
+  .reminders h3 {
+    font-family: var(--serif);
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+  .reminder-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .reminder-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .reminder-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--warn);
+    font-weight: 500;
+  }
+  .reminder-text { font-size: 14px; color: #CBD5E1; }
+  .reminder-text strong { color: var(--text); }
+
+  /* PROGRESS TRACKER */
+  .progress-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 32px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .progress-bar-fill {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .progress-count {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 48px 20px 36px; }
+    .container { padding: 0 16px 60px; }
+    .step-header { padding: 16px 18px; }
+    .step-body { padding: 0 18px 20px; }
+    .transform-pill { font-size: 11px; padding: 8px 14px; }
+    .result-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">🔐 Security Master Guide</div>
+  <h1>Secure Your Sites<br><em>From Public to Protected</em></h1>
+  <p>A complete 8-step guide to lock down your GitHub repos, deploy on Netlify, obfuscate your code, and add Firebase Authentication.</p>
+  <div class="transform-block">
+    <div class="transform-pill">Public GitHub Repo → Exposed Code</div>
+    <div class="arrow-icon">→</div>
+    <div class="transform-pill after">Private Repo → Netlify → Auth Protected ✓</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Overview -->
+  <div class="overview-grid">
+    <div class="overview-card"><div class="icon">🔒</div><div class="label">Private Repos</div><div class="sub">Code hidden</div></div>
+    <div class="overview-card"><div class="icon">🌐</div><div class="label">Netlify Deploy</div><div class="sub">Auto CI/CD</div></div>
+    <div class="overview-card"><div class="icon">🔀</div><div class="label">Obfuscation</div><div class="sub">Unreadable JS</div></div>
+    <div class="overview-card"><div class="icon">👤</div><div class="label">Google Auth</div><div class="sub">Login required</div></div>
+    <div class="overview-card"><div class="icon">🛡️</div><div class="label">Firestore Rules</div><div class="sub">Data isolated</div></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar">
+    <div class="progress-label">Progress</div>
+    <div class="progress-bar-fill"><div class="progress-bar-inner" id="progressInner" style="width:0%"></div></div>
+    <div class="progress-count" id="progressCount">0 / 8</div>
+  </div>
+
+  <div class="section-label">All Steps — Tap to Expand</div>
+
+  <!-- STEP 1 -->
+  <div class="step" id="step1">
+    <div class="step-header" onclick="toggleStep('step1')">
+      <div class="step-num">01</div>
+      <div class="step-title">Make All Repos Private on GitHub</div>
+      <span class="step-tag tag-required">Required</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:13.5px;margin-top:4px;">Do this for <strong>each repo</strong> one by one. Takes about 5 minutes total.</p>
+      <div class="instructions">
+        <div class="instruction"><div class="inst-num">1</div><div class="inst-text">Open <strong>github.com</strong> in your browser</div></div>
+        <div class="instruction"><div class="inst-num">2</div><div class="inst-text">Tap the <strong>☰ menu</strong> → tap <strong>Your repositories</strong></div></div>
+        <div class="instruction"><div class="inst-num">3</div><div class="inst-text">Find and tap your repo name</div></div>
+        <div class="instruction"><div class="inst-num">4</div><div class="inst-text">Tap the <strong>Settings</strong> tab (scroll the tab row to find it)</div></div>
+        <div class="instruction"><div class="inst-num">5</div><div class="inst-text">Scroll all the way down to the red <strong>Danger Zone</strong> section</div></div>
+        <div class="instruction"><div class="inst-num">6</div><div class="inst-text">Tap <strong>Change visibility</strong> → tap <strong>Make private</strong></div></div>
+        <div class="instruction"><div class="inst-num">7</div><div class="inst-text">A box appears — <strong>type the repo name exactly</strong> as shown</div></div>
+        <div class="instruction"><div class="inst-num">8</div><div class="inst-text">Tap <strong>"I understand, change repository visibility"</strong></div></div>
+      </div>
+      <div class="repeat-note">🔁 <strong>Repeat these exact steps</strong> for each of your other repos</div>
+      <div class="callout success" style="margin-top:14px;"><span class="callout-icon">✓</span><span>All repos private = your source code is now hidden from the public internet.</span></div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="step-header" onclick="toggleStep('step2')">
+      <div class="step-num">02</div>
+      <div class="step-title">Create a Netlify Account</div>
+      <span class="step-tag tag-required">Required</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <div class="instructions">
+        <div class="instruction"><div class="inst-num">1</div><div class="inst-text">Open <strong>netlify.com</strong> in your browser</div></div>
+        <div class="instruction"><div class="inst-num">2</div><div class="inst-text">Tap <strong>Sign up</strong> (top right)</div></div>
+        <div class="instruction"><div class="inst-num">3</div><div class="inst-text">Tap <strong>Sign up with GitHub</strong></div></div>
+        <div class="instruction"><div class="inst-num">4</div><div class="inst-text">When asked to authorize, tap <strong>Authorize Netlify</strong></div></div>
+        <div class="instruction"><div class="inst-num">5</div><div class="inst-text">You are now inside your Netlify dashboard</div></div>
+      </div>
+      <div class="callout note" style="margin-top:14px;"><span class="callout-icon">ℹ</span><span>Netlify is now connected to your GitHub. It can read your private repos and auto-deploy when you push code.</span></div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step3">
+    <div class="step-header" onclick="toggleStep('step3')">
+      <div class="step-num">03</div>
+      <div class="step-title">Deploy All Sites on Netlify</div>
+      <span class="step-tag tag-required">Required</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:13.5px;margin-top:4px;">Do this once for each repo. The steps are identical each time.</p>
+      <div class="instructions">
+        <div class="instruction"><div class="inst-num">1</div><div class="inst-text">On Netlify dashboard, tap <strong>Add new site</strong></div></div>
+        <div class="instruction"><div class="inst-num">2</div><div class="inst-text">Tap <strong>Import an existing project</strong></div></div>
+        <div class="instruction"><div class="inst-num">3</div><div class="inst-text">Tap <strong>Deploy with GitHub</strong></div></div>
+        <div class="instruction"><div class="inst-num">4</div><div class="inst-text">Search and select your repo from the list</div></div>
+        <div class="instruction"><div class="inst-num">5</div><div class="inst-text">Deploy settings: <strong>Branch</strong> = <code>main</code> — leave Build command and Publish directory <strong>completely empty</strong></div></div>
+        <div class="instruction"><div class="inst-num">6</div><div class="inst-text">Tap <strong>Deploy site</strong> and wait 1–2 minutes</div></div>
+        <div class="instruction"><div class="inst-num">7</div><div class="inst-text">Netlify gives you a random URL like <code>random-name-123.netlify.app</code> — tap it to verify it works</div></div>
+      </div>
+      <div class="repeat-note">🔁 <strong>Repeat for each repo.</strong> Same exact steps each time, just pick a different repo.</div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step4">
+    <div class="step-header" onclick="toggleStep('step4')">
+      <div class="step-num">04</div>
+      <div class="step-title">Update Firebase Authorized Domains</div>
+      <span class="step-tag tag-security">Security</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <div class="callout warn"><span class="callout-icon">⚠</span><span><strong>Do not skip this.</strong> Firebase Auth will stop working on your new Netlify URL until you add it here.</span></div>
+      <div class="instructions" style="margin-top:14px;">
+        <div class="instruction"><div class="inst-num">1</div><div class="inst-text">Open <strong>console.firebase.google.com</strong></div></div>
+        <div class="instruction"><div class="inst-num">2</div><div class="inst-text">Select your project</div></div>
+        <div class="instruction"><div class="inst-num">3</div><div class="inst-text">Left menu → tap <strong>Authentication</strong></div></div>
+        <div class="instruction"><div class="inst-num">4</div><div class="inst-text">Tap the <strong>Settings</strong> tab</div></div>
+        <div class="instruction"><div class="inst-num">5</div><div class="inst-text">Scroll to <strong>Authorized domains</strong> → tap <strong>Add domain</strong></div></div>
+        <div class="instruction"><div class="inst-num">6</div><div class="inst-text">Type your Netlify URL (e.g. <code>yoursite.netlify.app</code>) → tap <strong>Add</strong></div></div>
+      </div>
+      <div class="repeat-note">🔁 Repeat for <strong>each site's</strong> Netlify URL. Also repeat after Step 5 if you rename your sites.</div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="step5">
+    <div class="step-header" onclick="toggleStep('step5')">
+      <div class="step-num">05</div>
+      <div class="step-title">Rename Your Netlify Sites</div>
+      <span class="step-tag tag-optional">Optional</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:13.5px;margin-top:4px;">Change the random URL to something clean and memorable.</p>
+      <div class="instructions">
+        <div class="instruction"><div class="inst-num">1</div><div class="inst-text">On the Netlify dashboard, tap your site</div></div>
+        <div class="instruction"><div class="inst-num">2</div><div class="inst-text">Tap <strong>Site configuration</strong></div></div>
+        <div class="instruction"><div class="inst-num">3</div><div class="inst-text">Tap <strong>Change site name</strong></div></div>
+        <div class="instruction"><div class="inst-num">4</div><div class="inst-text">Type a clean name like <code>yourname-projectname</code></div></div>
+        <div class="instruction"><div class="inst-num">5</div><div class="inst-text">Tap <strong>Save</strong> — your URL becomes <code>yourname-projectname.netlify.app</code></div></div>
+      </div>
+      <div class="callout warn"><span class="callout-icon">⚠</span><span>After renaming, <strong>update Firebase Authorized Domains</strong> (Step 4) with the new URL. The old URL stops working.</span></div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step" id="step6">
+    <div class="step-header" onclick="toggleStep('step6')">
+      <div class="step-num">06</div>
+      <div class="step-title">Obfuscate Your JavaScript Code</div>
+      <span class="step-tag tag-security">Security</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:13.5px;margin-top:4px;">Makes your JS logic unreadable to anyone who views the page source. Only obfuscate JS — HTML and CSS don't need it.</p>
+
+      <div class="callout note" style="margin-top:12px;"><span class="callout-icon">ℹ</span><span>Your HTML file has 3 parts: <strong>HTML</strong> (between body tags), <strong>CSS</strong> (between style tags), <strong>JS</strong> (between script tags). We only touch the JS part.</span></div>
+
+      <div class="instructions" style="margin-top:14px;">
+        <div class="instruction"><div class="inst-num">1</div><div class="inst-text">Open your HTML file on GitHub</div></div>
+        <div class="instruction"><div class="inst-num">2</div><div class="inst-text">Find the <code>&lt;script&gt;</code> tag near the bottom — copy everything <strong>between</strong> the opening and closing script tags (not the tags themselves)</div></div>
+        <div class="instruction"><div class="inst-num">3</div><div class="inst-text">Open <strong>obfuscator.io</strong> in a new tab — paste your JS code in the left box</div></div>
+        <div class="instruction"><div class="inst-num">4</div><div class="inst-text">Apply these settings (see table below) → tap <strong>Obfuscate</strong></div></div>
+        <div class="instruction"><div class="inst-num">5</div><div class="inst-text">Copy all obfuscated code from the right box</div></div>
+        <div class="instruction"><div class="inst-num">6</div><div class="inst-text">Go back to your HTML file on GitHub → tap the <strong>pencil icon</strong> to edit</div></div>
+        <div class="instruction"><div class="inst-num">7</div><div class="inst-text">Delete the original JS code between the script tags — paste the obfuscated code in its place</div></div>
+        <div class="instruction"><div class="inst-num">8</div><div class="inst-text">Scroll down → tap <strong>Commit changes</strong> — Netlify auto-redeploys in 1–2 minutes</div></div>
+      </div>
+
+      <table class="settings-table" style="margin-top:16px;">
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Compact</td><td class="on">ON</td></tr>
+        <tr><td>Self Defending</td><td class="on">ON</td></tr>
+        <tr><td>String Array</td><td class="on">ON</td></tr>
+        <tr><td>String Array Encoding</td><td><code>base64</code></td></tr>
+        <tr><td>Everything else</td><td class="off">Leave as default</td></tr>
+      </table>
+
+      <div class="repeat-note" style="margin-top:14px;">🔁 <strong>Repeat for each HTML file</strong> — do this <em>after</em> all other edits are done. Never obfuscate before you finish editing.</div>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step" id="step7">
+    <div class="step-header" onclick="toggleStep('step7')">
+      <div class="step-num">07</div>
+      <div class="step-title">Add Firebase Auth to Unprotected Sites</div>
+      <span class="step-tag tag-security">Security</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:13.5px;margin-top:4px;">For any site that doesn't already have Google login, add it using the code below. Edit your HTML file on GitHub.</p>
+
+      <p style="color:#94A3B8;font-size:13px;margin-top:14px;font-weight:600;">Step 1 — Add Firebase scripts inside <code>&lt;head&gt;</code></p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre>&lt;!-- Firebase --&gt;
+&lt;<span class="kw">script</span> src=<span class="str">"https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"</span>&gt;&lt;/script&gt;
+&lt;<span class="kw">script</span> src=<span class="str">"https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"</span>&gt;&lt;/script&gt;</pre>
+      </div>
+
+      <p style="color:#94A3B8;font-size:13px;margin-top:16px;font-weight:600;">Step 2 — Add Auth logic at the top of your <code>&lt;script&gt;</code></p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm">// Copy your Firebase config from your existing project</span>
+<span class="kw">const</span> firebaseConfig = {
+  apiKey: <span class="str">"your-api-key"</span>,
+  authDomain: <span class="str">"your-project.firebaseapp.com"</span>,
+  projectId: <span class="str">"your-project-id"</span>,
+};
+firebase.<span class="fn">initializeApp</span>(firebaseConfig);
+
+<span class="cm">// Auth check — runs before anything else</span>
+firebase.<span class="fn">auth</span>().<span class="fn">onAuthStateChanged</span>(<span class="kw">function</span>(user) {
+  <span class="kw">if</span> (user) {
+    document.<span class="fn">getElementById</span>(<span class="str">'app'</span>).style.display = <span class="str">'block'</span>;
+    document.<span class="fn">getElementById</span>(<span class="str">'loginScreen'</span>).style.display = <span class="str">'none'</span>;
+  } <span class="kw">else</span> {
+    document.<span class="fn">getElementById</span>(<span class="str">'app'</span>).style.display = <span class="str">'none'</span>;
+    document.<span class="fn">getElementById</span>(<span class="str">'loginScreen'</span>).style.display = <span class="str">'flex'</span>;
+  }
+});
+
+<span class="kw">function</span> <span class="fn">googleLogin</span>() {
+  <span class="kw">const</span> provider = <span class="kw">new</span> firebase.auth.<span class="fn">GoogleAuthProvider</span>();
+  firebase.<span class="fn">auth</span>().<span class="fn">signInWithPopup</span>(provider);
+}
+<span class="kw">function</span> <span class="fn">logout</span>() {
+  firebase.<span class="fn">auth</span>().<span class="fn">signOut</span>();
+}</pre>
+      </div>
+
+      <p style="color:#94A3B8;font-size:13px;margin-top:16px;font-weight:600;">Step 3 — Wrap your HTML content in login/app divs</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">HTML</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm">&lt;!-- LOGIN SCREEN --&gt;</span>
+&lt;<span class="kw">div</span> id=<span class="str">"loginScreen"</span> style=<span class="str">"display:flex;flex-direction:column;
+  align-items:center;justify-content:center;height:100vh;"</span>&gt;
+  &lt;<span class="kw">h1</span>&gt;Your App Name&lt;/<span class="kw">h1</span>&gt;
+  &lt;<span class="kw">p</span>&gt;Sign in to continue&lt;/<span class="kw">p</span>&gt;
+  &lt;<span class="kw">button</span> onclick=<span class="str">"googleLogin()"</span>&gt;Sign in with Google&lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cm">&lt;!-- MAIN APP (hidden until login) --&gt;</span>
+&lt;<span class="kw">div</span> id=<span class="str">"app"</span> style=<span class="str">"display:none"</span>&gt;
+  <span class="cm">&lt;!-- ALL your existing HTML goes here --&gt;</span>
+&lt;/<span class="kw">div</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="step" id="step8">
+    <div class="step-header" onclick="toggleStep('step8')">
+      <div class="step-num">08</div>
+      <div class="step-title">Tighten Firestore Security Rules</div>
+      <span class="step-tag tag-security">Security</span>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:13.5px;margin-top:4px;">Ensures each logged-in user can only read and write <strong>their own data</strong> — nobody else's.</p>
+      <div class="instructions">
+        <div class="instruction"><div class="inst-num">1</div><div class="inst-text">Open <strong>console.firebase.google.com</strong> → select your project</div></div>
+        <div class="instruction"><div class="inst-num">2</div><div class="inst-text">Left menu → <strong>Firestore Database</strong> → tap <strong>Rules</strong> tab</div></div>
+        <div class="instruction"><div class="inst-num">3</div><div class="inst-text">Replace everything with the rules below</div></div>
+        <div class="instruction"><div class="inst-num">4</div><div class="inst-text">Tap <strong>Publish</strong></div></div>
+      </div>
+      <div class="code-block" style="margin-top:14px;">
+        <div class="code-block-header"><span class="code-lang">Firestore Rules</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre>rules_version = <span class="str">'2'</span>;
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=<span class="kw">**</span>} {
+      allow read, write: <span class="kw">if</span> request.auth != <span class="kw">null</span>
+                         && request.auth.uid == userId;
+    }
+  }
+}</pre>
+      </div>
+      <div class="callout success" style="margin-top:14px;">
+        <span class="callout-icon">✓</span>
+        <div>
+          <div>✅ Logged-in users can only access <strong>their own</strong> data</div>
+          <div style="margin-top:4px;">❌ No one can read another user's data</div>
+          <div style="margin-top:4px;">❌ Logged-out visitors cannot read anything</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL RESULT -->
+  <div class="section-label" style="margin-top:56px;">Final Result — After All 8 Steps</div>
+  <div class="result-grid">
+    <div class="result-row"><div class="result-check">✓</div><div class="result-label">GitHub repos are private</div><div class="result-desc">Source code hidden</div></div>
+    <div class="result-row"><div class="result-check">✓</div><div class="result-label">Sites deployed on Netlify</div><div class="result-desc">Auto-redeploys on every push</div></div>
+    <div class="result-row"><div class="result-check">✓</div><div class="result-label">JavaScript is obfuscated</div><div class="result-desc">Logic unreadable to viewers</div></div>
+    <div class="result-row"><div class="result-check">✓</div><div class="result-label">All sites require Google login</div><div class="result-desc">Auth gate before access</div></div>
+    <div class="result-row"><div class="result-check">✓</div><div class="result-label">Firestore data is isolated</div><div class="result-desc">Each user sees only their own</div></div>
+  </div>
+
+  <!-- IMPORTANT REMINDERS -->
+  <div class="reminders" style="margin-top:32px;">
+    <h3>⚠️ Important Reminders</h3>
+    <div class="reminder-item">
+      <div class="reminder-num">1</div>
+      <div class="reminder-text"><strong>Auto-deploy is active.</strong> Every time you edit your HTML and push to GitHub, Netlify redeploys automatically. No extra steps needed.</div>
+    </div>
+    <div class="reminder-item">
+      <div class="reminder-num">2</div>
+      <div class="reminder-text"><strong>Obfuscate last.</strong> Always finish all edits first, then obfuscate. Never obfuscate before you're done — obfuscated code is very hard to edit.</div>
+    </div>
+    <div class="reminder-item">
+      <div class="reminder-num">3</div>
+      <div class="reminder-text"><strong>Keep a master copy.</strong> Save your original, un-obfuscated HTML file somewhere safe (e.g. Google Drive). This is the copy you edit. The GitHub version is the published/obfuscated one.</div>
+    </div>
+    <div class="reminder-item">
+      <div class="reminder-num">4</div>
+      <div class="reminder-text"><strong>Firebase free plan is sufficient</strong> for personal use. No need to upgrade unless you hit usage limits.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleStep(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = 8;
+    const open = document.querySelectorAll('.step.open').length;
+    document.getElementById('progressInner').style.width = (open / total * 100) + '%';
+    document.getElementById('progressCount').textContent = open + ' / ' + total;
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    }).catch(() => {
+      btn.textContent = 'Copy manually';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
